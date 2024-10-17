@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { NavBar, Input, Button, Toast } from 'antd-mobile'
+import axios from 'axios'
 import {phoneReg,codeReg} from '../../config/reg'
 import {codeTime} from '../../config/constants'
 import './index.less'
@@ -56,7 +57,33 @@ export default class Login extends Component {
         this.setState({canClick: true,time: codeTime})
       }
     },1000)
-    console.log('send request...')
+    axios.post('http://localhost:8080/getVerifyCode',{phone}).then(
+      response => {
+        const {code,message} = response.data
+        if(code === 2000) Toast.show({
+          content: message,
+          duration: 2000,
+          maskClickable: false
+        }) 
+        else if(code !== 2000) Toast.show({
+          icon: 'fail',
+          content: message,
+          duration: 2000,
+          maskClickable: false
+        })
+        
+      },
+      error => {
+        Toast.show({
+          icon: 'fail',
+          content: 'network error, try again later',
+          duration: 2000,
+          maskClickable: false
+        })
+        clearInterval(this.timeId)
+        this.setState({canClick: true,time: codeTime})
+      }
+    )
   }
 
   render() {
